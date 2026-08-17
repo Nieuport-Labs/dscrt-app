@@ -190,8 +190,10 @@ export async function fetchTokenBalance(
  * Deposits and withdrawals scale with the validator set, because both re-read every
  * delegation before pricing — about 7 500 gas each. A flat limit therefore has to choose
  * between being wrong on a large set and overcharging on a small one, so it is computed
- * from the set instead. `scripts/gas-probe.mjs` measures these against a live devnet and
- * fails if the margin drops below 1.8x; re-run it whenever the pricing path changes.
+ * from the set instead. These were measured by `scripts/gas-probe.mjs`, which lives in the
+ * protocol repository and reads *its own copy* of this file — it cannot see this one. Change
+ * a number here and the probe will keep validating the old one and keep reporting success,
+ * so re-run it against a copy of these values whenever the pricing path changes.
  *
  * Too low is worse than too high — the transaction fails and the fee is charged anyway —
  * hence the 2.5x margin. Wallets may substitute their own fee when they sign, which this
@@ -231,9 +233,11 @@ export const GAS = {
  * Gas for one upkeep transaction, sized like the keeper's own.
  *
  * Compound is the expensive shape — a query, a reward withdrawal and, at the end, a
- * delegation and a mint per validator — so its measured cost sizes the whole batch. The
- * keeper uses the same numbers, in `keeper/src/client.ts`; `scripts/gas-probe.mjs` checks
- * both against a live devnet.
+ * delegation and a mint per validator — so its measured cost sizes the whole batch.
+ *
+ * The keeper carries the same numbers in its own repository, and nothing keeps the two in
+ * step. They are measured values that legitimately differ in what they cover, so sharing
+ * them would be the wrong fix; knowing they are copies is the right one.
  */
 const UPKEEP_BASE_GAS = 95_000;
 const UPKEEP_PER_VALIDATOR = 9_300;
