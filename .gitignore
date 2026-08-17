@@ -1,0 +1,14 @@
+node_modules/
+
+# Build output. `output: "export"` writes `out/`; `.next/` is the intermediate.
+.next/
+out/
+*.tsbuildinfo
+
+.vercel/
+
+.env
+.env.*
+!.env.example
+
+.DS_Store

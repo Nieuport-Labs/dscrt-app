@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Daily. The shapes job below is the only thing that would notice the contract renaming
+    # or growing a field, and it should not wait for someone to push.
+    - cron: "23 6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Types and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `ci`, not `install`: it fails on a lockfile that disagrees with package.json.
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      # The job that earns its keep. This repository was extracted from a monorepo whose
+      # hoisted `node_modules` supplied a dependency `package.json` never declared, so the
+      # app built there and would not have built here. Only a real install plus a real
+      # build has any chance of noticing that class of mistake.
+      - run: npm run build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-export
+          path: out/
+
+  shapes:
+    name: Contract shapes
+    # Not on pull_request: this queries a live testnet, and a chain having a bad afternoon
+    # must never be able to block a merge.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:shapes

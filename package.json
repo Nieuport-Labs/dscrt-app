@@ -1,0 +1,34 @@
+{
+  "name": "dscrt-app",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frontend for dSCRT, liquid staking on Secret Network",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jirkacepelka/dscrt-app.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:shapes": "node --experimental-strip-types --test test/shapes.test.ts"
+  },
+  "dependencies": {
+    "@cosmjs/encoding": "^0.32.3",
+    "next": "^15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "secretjs": "^1.22.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

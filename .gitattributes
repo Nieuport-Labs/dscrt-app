@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# The brand marks. Without these a Windows checkout applies line-ending translation to
+# binary files and quietly corrupts them.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff binary
+*.woff2 binary
