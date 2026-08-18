@@ -18,7 +18,7 @@ export function Footer() {
             * is where the money actually lives, and it is the one worth auditing.
             */}
           <a
-            href="https://github.com/jirkacepelka/dscrt-app"
+            href="https://github.com/Nieuport-Labs/dscrt-app"
             target="_blank"
             rel="noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
@@ -26,7 +26,7 @@ export function Footer() {
             Interface <External size={12} />
           </a>
           <a
-            href="https://github.com/jirkacepelka/SteakSCRT"
+            href="https://github.com/Nieuport-Labs/dscrt-contracts"
             target="_blank"
             rel="noreferrer"
             style={{ display: "inline-flex", alignItems: "center", gap: 6 }}

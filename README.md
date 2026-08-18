@@ -1,6 +1,6 @@
 # dscrt-app
 
-The web interface for [dSCRT](https://github.com/jirkacepelka/SteakSCRT), liquid staking on
+The web interface for [dSCRT](https://github.com/Nieuport-Labs/dscrt-contracts), liquid staking on
 Secret Network.
 
 Stake SCRT, receive a liquid derivative that appreciates against it, request withdrawals,
@@ -59,9 +59,8 @@ is valid for, and cannot be replayed anywhere else. Disconnecting deletes it.
 ## Where the rest lives
 
 Contracts, deploy scripts and the runbook are in
-[SteakSCRT](https://github.com/jirkacepelka/SteakSCRT); the upkeep bot is in
-[dscrt-keeper](https://github.com/jirkacepelka/dscrt-keeper). The protocol repository also
-holds a copy of this app from before the split; **this repository is the maintained one.**
+[dscrt-contracts](https://github.com/Nieuport-Labs/dscrt-contracts); the upkeep bot is in
+[dscrt-keeper](https://github.com/Nieuport-Labs/dscrt-keeper). All three were split out of `jirkacepelka/SteakSCRT`, which is now archived.
 
 ## Licence
 

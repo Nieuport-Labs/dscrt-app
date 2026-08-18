@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jirkacepelka/dscrt-app.git"
+    "url": "https://github.com/Nieuport-Labs/dscrt-app.git"
   },
   "engines": {
     "node": ">=20"
