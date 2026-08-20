@@ -176,7 +176,7 @@ export function AccountDrawer({ onClose }: { onClose: () => void }) {
 
         <div className="drawer-body">
           {view === "settings" ? (
-            <SettingsBody />
+            <SettingsBody address={address} />
           ) : (
             <>
 

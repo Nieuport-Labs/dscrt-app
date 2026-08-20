@@ -15,6 +15,7 @@ import {
   toBase64,
   type Connection,
 } from "./chain";
+import { chooseFeeGranter } from "./feegrant";
 
 export interface ProtocolState {
   total_bonded: string;
@@ -254,6 +255,38 @@ export function gasCost(limit: number): number {
   return Math.ceil(limit * GAS_PRICE);
 }
 
+/**
+ * A representative transaction, for judging whether a fee grant is worth anything.
+ *
+ * The settings panel has to say "this grant can pay" before knowing which button the user
+ * will press, so it asks about the one they press first and most: a deposit, sized for a
+ * full validator set. It is the largest of the everyday three, which makes the answer the
+ * safe way round — a grant this clears will clear a withdrawal and a claim too.
+ */
+export function typicalGas(): number {
+  return scaled("deposit");
+}
+
+/**
+ * The fee half of a transaction: what to spend, and whose money.
+ *
+ * Every write in this file goes through here, so a fee grant applies to all of them or to
+ * none — a grant that covered depositing but not withdrawing would be a trap, since the
+ * withdrawal is the leg a user cannot skip.
+ *
+ * `feeGranter` is omitted rather than sent empty. An empty string is a granter address of
+ * "", which the chain reads as a real account and rejects, so the absence has to be an
+ * absent key. The lookup itself never fails loudly — see `chooseFeeGranter`.
+ */
+async function feeFor(conn: Connection, gasLimit: number) {
+  const feeGranter = await chooseFeeGranter(conn.address, gasLimit, GAS_PRICE);
+  return {
+    gasLimit,
+    gasPriceInFeeDenom: GAS_PRICE,
+    ...(feeGranter ? { feeGranter } : {}),
+  };
+}
+
 export type UpkeepTask = "sync" | "compound" | "advance_window" | "collect_matured";
 
 const UPKEEP_MSG: Record<UpkeepTask, object> = {
@@ -292,10 +325,10 @@ export async function runUpkeep(
       }),
   );
 
-  const tx = await conn.client.tx.broadcast(messages, {
-    gasLimit: upkeepGas(validators, tasks.length),
-    gasPriceInFeeDenom: GAS_PRICE,
-  });
+  const tx = await conn.client.tx.broadcast(
+    messages,
+    await feeFor(conn, upkeepGas(validators, tasks.length)),
+  );
   if (tx.code !== 0) throw new Error(tx.rawLog);
   return tx;
 }
@@ -315,7 +348,7 @@ async function execCore(
       msg,
       sent_funds: funds,
     },
-    { gasLimit, gasPriceInFeeDenom: GAS_PRICE },
+    await feeFor(conn, gasLimit),
   );
   if (tx.code !== 0) throw new Error(tx.rawLog);
   return tx;
@@ -356,7 +389,7 @@ export async function requestUnbond(
         },
       },
     },
-    { gasLimit: scaled("unbond", validators), gasPriceInFeeDenom: GAS_PRICE },
+    await feeFor(conn, scaled("unbond", validators)),
   );
   if (tx.code !== 0) throw new Error(tx.rawLog);
   return tx;

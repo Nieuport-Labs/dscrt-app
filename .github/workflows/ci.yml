@@ -29,6 +29,11 @@ jobs:
 
       - run: npm run typecheck
 
+      # Offline and deterministic, so unlike the shapes job it belongs on every pull
+      # request: the fee grant reader is vendored code, and the app's half of the contract
+      # with it — which message type it sends — is exactly what a refactor moves silently.
+      - run: npm run test:feegrant
+
       # The job that earns its keep. This repository was extracted from a monorepo whose
       # hoisted `node_modules` supplied a dependency `package.json` never declared, so the
       # app built there and would not have built here. Only a real install plus a real
