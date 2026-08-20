@@ -75,6 +75,9 @@
 
   --shell: 1120px;
   --card: 480px;
+  /* How much of the close strip shows beside the panel. It is tucked under the panel by a
+     further corner radius on top of this, which is hidden. */
+  --spine: 48px;
 
   --font: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-geist), var(--font);
@@ -1077,32 +1080,82 @@ code {
 /* ---------------------------------------------------------------- drawer */
 
 /*
- * A panel that floats beside the page rather than over it.
+ * A panel that floats beside the page rather than over it, and the strip that closes it.
  *
  * No scrim, deliberately. An overlay that dims the screen says "deal with me first", and
  * an account panel has no business saying that — you open it to check a balance while
  * doing something else, and the something else has to stay usable.
  *
- * It runs the full height of the window, past the bar rather than under it. Tucked beneath
- * the bar it read as a dropdown hanging off the button that opened it; at full height it
- * reads as the second column it actually is, and the eye stops treating the bar as a lid.
- * The cost is that it covers the right end of the bar — which holds the very button that
- * opened it, and nothing else.
+ * The panel runs the full height of the window, past the bar rather than under it. Tucked
+ * beneath the bar it read as a dropdown hanging off the button that opened it; at full
+ * height it reads as the second column it actually is, and the eye stops treating the bar
+ * as a lid. The cost is that it covers the right end of the bar — which holds the very
+ * button that opened it, and nothing else.
+ *
+ * The dock is a frame rather than a surface: it takes no clicks itself, so the page behind
+ * the gap above the spine stays live, which is the whole premise of not blocking the page.
  */
-.drawer {
+.drawer-dock {
   position: fixed;
   top: var(--s-3);
   right: var(--s-3);
   bottom: var(--s-3);
   z-index: 40;
-  width: min(360px, calc(100vw - var(--s-6)));
+  display: flex;
+  align-items: stretch;
+  pointer-events: none;
+  animation: drawer-in var(--med) var(--ease);
+}
+
+/*
+ * The way out.
+ *
+ * The panel used to close on a click anywhere else, which is the wrong bargain for a panel
+ * that deliberately does not block the page: every click aimed at the page behind it was
+ * spent dismissing it instead. So dismissal gets a surface of its own — barely a tint,
+ * because it is a target rather than a thing to look at, and it earns its contrast on
+ * hover, when somebody is already pointing at it.
+ */
+.drawer-spine {
+  pointer-events: auto;
+  flex: none;
+  width: calc(var(--spine) + var(--r-lg));
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  border-radius: var(--r-lg) 0 0 var(--r-lg);
+  /* Tucked under the panel by exactly its corner radius, so it reads as one surface
+     passing behind another rather than as a tab stuck to the side. */
+  margin-right: calc(var(--r-lg) * -1);
+  background: rgba(255, 255, 255, 0.02);
+  transition: background var(--fast) var(--ease);
+}
+
+.drawer-spine:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* White over a light page is invisible, and a control you cannot see is not a control. The
+   same two steps, in the ink of the theme that is actually showing. */
+[data-theme="light"] .drawer-spine {
+  background: rgba(16, 24, 40, 0.03);
+}
+
+[data-theme="light"] .drawer-spine:hover {
+  background: rgba(16, 24, 40, 0.07);
+}
+
+.drawer {
+  pointer-events: auto;
+  position: relative;
+  flex: none;
+  width: min(360px, calc(100vw - var(--s-6) - var(--spine)));
   display: flex;
   flex-direction: column;
   background: var(--overlay);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-lg);
-  animation: drawer-in var(--med) var(--ease);
 }
 
 @keyframes drawer-in {
@@ -1290,10 +1343,26 @@ code {
   align-items: flex-end;
 }
 
+/*
+ * On a phone the panel is a sheet at the bottom, so the spine rotates with it: a bar
+ * across the top of the sheet rather than a strip down its side. The dock still takes no
+ * clicks, so the page above the bar is still reachable — which is what keeps this a close
+ * button and not a scrim by another name.
+ */
 @media (max-width: 560px) {
-  .drawer {
-    top: auto;
+  .drawer-dock {
     left: var(--s-3);
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .drawer-spine {
+    width: auto;
+    height: calc(var(--spine) + var(--r-lg));
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    margin-right: 0;
+    margin-bottom: calc(var(--r-lg) * -1);
+  }
+  .drawer {
     width: auto;
     max-height: 78vh;
   }

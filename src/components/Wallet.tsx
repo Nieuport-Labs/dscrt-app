@@ -151,7 +151,6 @@ export function ConnectButton() {
     <>
       <button
         className="btn btn--quiet btn--sm"
-        data-account-toggle
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
