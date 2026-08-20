@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DEPLOYMENT, fromMicro, shortAddress } from "@/lib/chain";
 import {
@@ -27,8 +27,8 @@ import {
 } from "@/lib/feegrant";
 import { gasCost, typicalGas } from "@/lib/protocol";
 
+import { Drawer } from "./Drawer";
 import { Alert, Check, Close, Copy, Moon, Spinner, Sun } from "./Icon";
-import { Portal } from "./Portal";
 import { useTheme } from "./Theme";
 
 /**
@@ -48,42 +48,20 @@ import { useTheme } from "./Theme";
  * choice worth surfacing rather than a detail to hide. See `lib/feegrant.ts`.
  */
 export function SettingsDialog({ onClose }: { onClose: () => void }) {
-  const panel = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    // No scrim to catch an outside click, so listen for one directly — and let it through
-    // to whatever it was aimed at, which is the point of not blocking the page.
-    const onDown = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (!panel.current || panel.current.contains(target)) return;
-      if (target instanceof Element && target.closest('[aria-label="Settings"]')) return;
-      onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("mousedown", onDown);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("mousedown", onDown);
-    };
-  }, [onClose]);
-
   return (
-    <Portal>
-      <div className="drawer" ref={panel} role="dialog" aria-label="Settings">
-        <div className="drawer-head">
-          <h2 className="h2" style={{ flex: 1 }}>
-            Settings
-          </h2>
-          <button className="icon-btn" onClick={onClose} aria-label="Close settings">
-            <Close />
-          </button>
-        </div>
-        <div className="drawer-body">
-          <SettingsBody />
-        </div>
+    <Drawer label="Settings" onClose={onClose}>
+      <div className="drawer-head">
+        <h2 className="h2" style={{ flex: 1 }}>
+          Settings
+        </h2>
+        <button className="icon-btn" onClick={onClose} aria-label="Close settings">
+          <Close />
+        </button>
       </div>
-    </Portal>
+      <div className="drawer-body">
+        <SettingsBody />
+      </div>
+    </Drawer>
   );
 }
 
