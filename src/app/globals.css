@@ -75,7 +75,6 @@
 
   --shell: 1120px;
   --card: 480px;
-  --nav-h: 63px;
 
   --font: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-display: var(--font-geist), var(--font);
@@ -289,13 +288,19 @@ code {
 
 /* ---------------------------------------------------------------- nav */
 
+/*
+ * No bottom rule.
+ *
+ * The bar already separates itself from the page by blurring what scrolls under it, and a
+ * line on top of that draws the seam twice. Removing it lets the panel that now runs past
+ * the bar read as one surface rather than as two rooms with a wall between them.
+ */
 .nav {
   position: sticky;
   top: 0;
   z-index: 30;
   backdrop-filter: blur(14px);
   background: color-mix(in srgb, var(--bg) 82%, transparent);
-  border-bottom: 1px solid var(--line);
 }
 
 .nav-inner {
@@ -392,26 +397,6 @@ code {
   }
 }
 
-/*
- * On a phone the network pill would take a row to itself, which is a lot of chrome to
- * spend above the one card the screen is for. The dot alone carries the warning; the full
- * chain id is a tap away in settings.
- */
-/* The chain is a fact about the session, not a badge. */
-.net {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 520;
-  color: var(--ink-3);
-  white-space: nowrap;
-}
-
-.net .dot {
-  background: var(--warn);
-}
-
 @media (max-width: 560px) {
   .nav-inner {
     padding: 6px var(--s-4);
@@ -422,9 +407,6 @@ code {
   .brand img {
     width: 22px;
     height: 22px;
-  }
-  .net span:not(.dot) {
-    display: none;
   }
 }
 
@@ -907,6 +889,7 @@ code {
   border: 1px solid var(--line);
   color: var(--ink-2);
   white-space: nowrap;
+  flex: none;
 }
 
 .pill--good {
@@ -1098,12 +1081,17 @@ code {
  *
  * No scrim, deliberately. An overlay that dims the screen says "deal with me first", and
  * an account panel has no business saying that — you open it to check a balance while
- * doing something else, and the something else has to stay usable. It also sits below the
- * bar, so navigation keeps working with the panel open.
+ * doing something else, and the something else has to stay usable.
+ *
+ * It runs the full height of the window, past the bar rather than under it. Tucked beneath
+ * the bar it read as a dropdown hanging off the button that opened it; at full height it
+ * reads as the second column it actually is, and the eye stops treating the bar as a lid.
+ * The cost is that it covers the right end of the bar — which holds the very button that
+ * opened it, and nothing else.
  */
 .drawer {
   position: fixed;
-  top: calc(var(--nav-h) + var(--s-3));
+  top: var(--s-3);
   right: var(--s-3);
   bottom: var(--s-3);
   z-index: 40;
@@ -1134,11 +1122,107 @@ code {
 
 .drawer-body {
   flex: 1;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--s-4);
   display: flex;
   flex-direction: column;
   gap: var(--s-5);
+}
+
+/* Flex children default to min-width:auto, which is "as wide as my content" — that is how
+   one long address pushes a whole settings panel off the screen. */
+.drawer-body > *,
+.drawer-body section,
+.drawer-body .field {
+  min-width: 0;
+}
+
+/*
+ * A row in a settings list: a node, or a fee grant.
+ *
+ * One shape for both, because both say the same three things — here is the thing, here is
+ * how it is doing, here is what you can do about it. It replaces six inline styles on a
+ * `.well`, and that is where the panel's overflow came from: nothing in a flex row shrinks
+ * unless something tells it to, so one long host name pushed the buttons clean off the
+ * screen. Every part that can grow is capped here, once.
+ */
+.opt {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-width: 0;
+  padding: var(--s-3);
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-md);
+}
+
+.opt--on {
+  border-color: var(--accent);
+}
+
+.opt-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.opt-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* The one part allowed to be arbitrarily long, and therefore the one that must clip. */
+.opt-name {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 560;
+}
+
+.opt-name--mono {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.opt-meta {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+/* Controls keep their size; it is the text beside them that gives way. */
+.opt-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+/* An input that shares its row with a button, and must not win the argument. */
+.field-row {
+  display: flex;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.field-row .input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.field-row .btn {
+  flex: none;
 }
 
 /* The address, as a chip you can lift. */
@@ -1484,6 +1568,27 @@ pre.payload {
 .footer {
   border-top: 1px solid var(--line);
   padding: var(--s-5) var(--s-6);
+}
+
+/*
+ * The chain is a fact about the build, not a badge.
+ *
+ * It used to sit in the bar next to Connect, where a warning colour beside the one button
+ * everybody presses read as a problem with the session. Here it stands with the other
+ * things that are simply true of this deployment, and the dot still does the warning.
+ */
+.net {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 520;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.net .dot {
+  background: var(--warn);
 }
 
 .footer-inner {

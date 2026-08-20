@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { DEPLOYMENT } from "@/lib/chain";
 import { isDefaultEndpoint } from "@/lib/endpoint";
 
 import { Settings as SettingsIcon } from "./Icon";
@@ -16,18 +15,6 @@ const TABS = [
   { href: "/statistics", label: "Statistics" },
   { href: "/governance", label: "Governance" },
 ];
-
-/** Testnets say so. Nobody should discover which chain they are on from a failed transaction. */
-function NetworkPill() {
-  const isMainnet = DEPLOYMENT.chainId === "secret-4";
-  if (isMainnet) return null;
-  return (
-    <span className="net" title={`Connected to ${DEPLOYMENT.chainId}`}>
-      <span className="dot" />
-      <span>{DEPLOYMENT.chainId}</span>
-    </span>
-  );
-}
 
 export function Nav() {
   const pathname = usePathname();
@@ -62,7 +49,6 @@ export function Nav() {
           </div>
 
           <div className="nav-end">
-            <NetworkPill />
             {showGear && (
               <button
                 className="icon-btn"

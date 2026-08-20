@@ -16,7 +16,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test:shapes": "node --experimental-strip-types --test test/shapes.test.ts"
+    "test:shapes": "node --experimental-strip-types --test test/shapes.test.ts",
+    "test:feegrant": "node --experimental-strip-types --test test/feegrant.test.ts"
   },
   "dependencies": {
     "@cosmjs/encoding": "^0.32.3",
